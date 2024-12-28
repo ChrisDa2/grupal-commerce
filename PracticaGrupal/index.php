@@ -2,18 +2,22 @@
 session_start();
 require 'database.php';
 
+$page = isset($_GET['page']) ? $_GET['page'] : 'home';
+
+// List of allowed pages to avoid external access
+$allowedPages = [
+    'index', 'home', 'products', 'product', 'cart', 'admin', 'login', 'logout', 'register', 'register2', 'forgot_password', 'reset_password', 'change_password', 'confirm_email'
+];
+
+// If the page is not allowed, default to 'home'
+if (!in_array($page, $allowedPages)) {
+    $page = 'home';
+}
+
 include 'header.php';
+
 ?>
 
-<main>
-    <!-- Contenedor para cargar contenido dinámico -->
-    <div id="main-content">
-        <h2>Welcome to Gym & Bikes</h2>
-        <p>Shop the latest products and enjoy exclusive deals.</p>
-    </div>
-</main>
-
-<?php include 'footer.php'; ?>
 <script>
     // Función para cargar páginas dinámicamente
     async function loadPage(page) {
@@ -58,6 +62,7 @@ include 'header.php';
         }
     }
 
+
     // Configuración inicial
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('a[data-page]').forEach(link => {
@@ -71,3 +76,7 @@ include 'header.php';
         initializeFormHandlers();
     });
 </script>
+
+<?php
+include 'footer.php';
+?>
