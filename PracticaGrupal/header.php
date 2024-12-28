@@ -23,8 +23,8 @@
             <!-- Navigation Menu -->
             <nav>
                 <ul>
-                    <li><a href="index.php?page=home">Home</a></li>
-                    <li><a href="index.php?page=products">Products</a></li>
+                    <li><a href="#" data-page="home">Home</a></li>
+                    <li><a href="#" data-page="products">Products</a></li>
                     <?php if (isset($_SESSION['user_id'])): ?>
                         <li><a href="index.php?page=cart">Cart</a></li>
                         <li><a href="index.php?page=change_password">Change Password</a></li>
@@ -33,8 +33,8 @@
                             <li><a href="index.php?page=admin">Admin</a></li>
                         <?php endif; ?>
                     <?php else: ?>
-                        <li><a href="index.php?page=login">Login</a></li>
-                        <li><a href="index.php?page=register2">Register</a></li>
+                        <li><a href="#" data-page="login">Login</a></li>
+                        <li><a href="#" data-page="register2">Register</a></li>
                     <?php endif; ?>
                 </ul>
             </nav>
