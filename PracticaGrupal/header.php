@@ -26,16 +26,16 @@
                     <li><a href="#" data-page="home">Home</a></li>
                     <li><a href="#" data-page="products">Products</a></li>
                     <?php if (isset($_SESSION['user_id'])): ?>
-                        <li><a href="index.php?page=cart">Cart</a></li>
-                        <li><a href="index.php?page=change_password">Change Password</a></li>
-                        <li><a href="index.php?page=logout">Logout</a></li>
-                        <?php if ($_SESSION['email'] == 'admin@example.es'): ?>
-                            <li><a href="index.php?page=admin">Admin</a></li>
-                        <?php endif; ?>
-                    <?php else: ?>
-                        <li><a href="#" data-page="login">Login</a></li>
-                        <li><a href="#" data-page="register2">Register</a></li>
-                    <?php endif; ?>
+                        <li><a href="#" data-page="cart">Cart</a></li>
+                        <li><a href="#" data-page="change_password">Change Password</a></li>
+                        <li><a href="#" data-page="logout">Logout</a></li>
+                            <?php if ($_SESSION['email'] == 'admin@example.es'): ?>
+                                <li><a href="#" data-page="admin">Admin</a></li>
+                            <?php endif; ?>
+                            <?php else: ?>
+                                <li><a href="#" data-page="login">Login</a></li>
+                                <li><a href="#" data-page="register2">Register</a></li>
+                            <?php endif; ?>
                 </ul>
             </nav>
 

@@ -1,68 +1,73 @@
 <?php
-session_start(); // Start the session to handle user login status
-
+session_start();
 require 'database.php';
 
-// Determine the current page based on the URL query parameter
-$page = isset($_GET['page']) ? $_GET['page'] : 'home';
-
-// List of allowed pages to avoid external access
-$allowedPages = [
-    'main', 'home', 'products', 'product', 'cart','cart_action', 'cart_remove', 'checkout', 'admin', 'edit_product', 'order_success','login', 'logout', 'register', 'register2', 'forgot_password', 'reset_password', 'change_password', 'confirm_email'
-];
-
-// If the page is not allowed, default to 'home'
-if (!in_array($page, $allowedPages)) {
-    $page = 'home';
-}
-
-// Include the header for the website (this will include the navigation)
 include 'header.php';
-
-// Include the requested page based on the query parameter
-// The pages are stored in the "pages" folder
-//include "pages/$page.php";
-
 ?>
 
+<main>
+    <!-- Contenedor para cargar contenido dinámico -->
+    <div id="main-content">
+        <h2>Welcome to Gym & Bikes</h2>
+        <p>Shop the latest products and enjoy exclusive deals.</p>
+    </div>
+</main>
+
+<?php include 'footer.php'; ?>
 <script>
-    // Function to load pages dynamically
+    // Función para cargar páginas dinámicamente
     async function loadPage(page) {
         try {
-            // Fetch the content of the requested page
             const response = await fetch('pages/' + page + '.php');
             if (!response.ok) {
-                throw new Error('Failed to load page.');
+                throw new Error(`Failed to load page ${page}.`);
             }
+            const content = await response.text();
+            document.getElementById('main-content').innerHTML = content;
 
-            // Get the response text and update the main content
-            const data = await response.text();
-            document.getElementById('main-content').innerHTML = data;
+            // Vuelve a inicializar los formularios en la nueva página
+            initializeFormHandlers();
         } catch (error) {
-            // Display an error message in case of failure
             document.getElementById('main-content').innerHTML = `<p>Error loading the page: ${error.message}</p>`;
         }
     }
 
-    // Event delegation for navigation links
-    document.addEventListener('click', function (e) {
-        // Check if the clicked element has the data-page attribute
-        if (e.target.tagName === 'A' && e.target.dataset.page) {
-            e.preventDefault(); // Prevent default link behavior
-            const page = e.target.dataset.page; // Get the value of data-page
-            loadPage(page); // Load the requested page
+    // Inicializa los manejadores de eventos de formularios
+    function initializeFormHandlers() {
+        const loginForm = document.querySelector('#login-form');
+        if (loginForm) {
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(loginForm);
+                try {
+                    const response = await fetch('login.php', {
+                        method: 'POST',
+                        body: formData,
+                    });
+                    const result = await response.text();
+                    document.getElementById('login-message').innerHTML = result;
+
+                    // Si el login es exitoso, carga la página principal
+                    if (result.includes('Correct password')) {
+                        loadPage('home');
+                    }
+                } catch (error) {
+                    document.getElementById('login-message').innerHTML = `<p>Error: ${error.message}</p>`;
+                }
+            });
         }
+    }
+
+    // Configuración inicial
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('a[data-page]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = link.getAttribute('data-page');
+                loadPage(page);
+            });
+        });
+
+        initializeFormHandlers();
     });
 </script>
-
-
-<?php
-
-// Include the footer for the website
-include 'footer.php';
-
-// Close the database connection
-$mysqliC->close();
-$mysqliH->close();
-$mysqliM->close();
-?>

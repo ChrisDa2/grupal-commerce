@@ -1,5 +1,6 @@
 <?php
 // Assuming $mysqli is your MySQLi connection
+include_once "../database.php";
 
 // Get the filter parameters from the form submission
 $categoryFilter = isset($_POST['category']) ? $_POST['category'] : '';
@@ -99,7 +100,7 @@ $filterParams[] = $itemsPerPage;
 $filterParams[] = $offset;
 
 // Prepare the SQL statement
-$stmt = $mysqli->prepare($query);
+$stmt = $mysqliC->prepare($query);
 
 // Dynamically build the bind type string based on the filters
 $bindTypes = '';
@@ -161,7 +162,7 @@ if ($maxPrice) {
 }
 
 // Prepare the count query
-$countStmt = $mysqli->prepare($countQuery);
+$countStmt = $mysqliC->prepare($countQuery);
 
 // Bind parameters dynamically
 $countFilterParams = [];
@@ -249,14 +250,14 @@ $typesQuery = "SELECT DISTINCT type FROM products $filteredIdsCondition";
 $stylesQuery = "SELECT DISTINCT style FROM products $filteredIdsCondition";
 
 // Execute the filter queries
-$brandsResult = $mysqli->query($brandsQuery);
-$colorsResult = $mysqli->query($colorsQuery);
-$typesResult = $mysqli->query($typesQuery);
-$stylesResult = $mysqli->query($stylesQuery);
+$brandsResult = $mysqliC->query($brandsQuery);
+$colorsResult = $mysqliC->query($colorsQuery);
+$typesResult = $mysqliC->query($typesQuery);
+$stylesResult = $mysqliC->query($stylesQuery);
 
 // Now, for the category filter, always fetch all categories, regardless of the current filter.
 $categoriesQuery = "SELECT DISTINCT category FROM products";
-$categoriesResult = $mysqli->query($categoriesQuery);
+$categoriesResult = $mysqliC->query($categoriesQuery);
 
 
 ?>
