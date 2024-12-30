@@ -29,7 +29,7 @@
                         <li><a href="#" data-page="cart">Cart</a></li>
                         <li><a href="#" data-page="change_password">Change Password</a></li>
                         <li><a href="#" data-page="logout">Logout</a></li>
-                            <?php if ($_SESSION['email'] == 'admin@example.es'): ?>
+                            <?php if ($_SESSION['email'] == 'admin@gmail.com'): ?>
                                 <li><a href="#" data-page="admin">Admin</a></li>
                             <?php endif; ?>
                             <?php else: ?>

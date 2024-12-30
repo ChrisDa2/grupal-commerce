@@ -44,7 +44,7 @@ include 'header.php';
                 e.preventDefault();
                 const formData = new FormData(loginForm);
                 try {
-                    const response = await fetch('login.php', {
+                    const response = await fetch('pages/login.php', {
                         method: 'POST',
                         body: formData,
                     });
@@ -60,7 +60,42 @@ include 'header.php';
                 }
             });
         }
-    }
+
+        const registerForm = document.querySelector('#register-form');
+        if (registerForm) {
+            registerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(registerForm);
+                try {
+                    const response = await fetch('pages/register2.php', {
+                        method: 'POST',
+                        body: formData,
+                    });
+
+                    // Verifica si la respuesta es válida
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    // Obtén la respuesta como texto
+                    const result = await response.text();
+
+                    // Manejo del mensaje en el cliente
+                    const messageDiv = document.getElementById('register-message');
+                    messageDiv.textContent = result;
+                    messageDiv.style.color = result.includes('successful') ? 'green' : 'red';
+
+                    // Si el registro fue exitoso, carga la página de inicio
+                    if (result.includes('successful')) {
+                        registerForm.reset(); // Limpia el formulario
+                        loadPage('home');
+                    }
+                } catch (error) {
+                    document.getElementById('register-message').innerHTML = `<p>Error: ${error.message}</p>`;
+                }
+            });
+        }
+}
 
 
     // Configuración inicial
