@@ -1,4 +1,9 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+session_start();
 require '../database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -18,6 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (password_verify($password, $user['password'])) {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['email'] = $user['email'];
+            $_SESSION['is_admin'] = ($user['email'] == 'admin@gmail.com');  // Asegúrate de configurar esta variable
+            var_dump($_SESSION); // Verifica los datos de la sesión
             echo "Correct password.";
         } else {
             echo "Invalid password.";
@@ -30,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <section>
     <h2>Login</h2>
-    <form id="login-form">
+    <form id="login-form" method="POST">
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required>
         <label for="password">Password:</label>

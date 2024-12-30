@@ -16,6 +16,13 @@ if (!in_array($page, $allowedPages)) {
 
 include 'header.php';
 
+var_dump($_SESSION); // Verifica los datos de la sesión
+
+if (isset($_SESSION['user_id']))
+{
+    echo "PASUDOFIASJEFÑ3KLE";
+}
+
 ?>
 
 <script>
@@ -36,13 +43,46 @@ include 'header.php';
         }
     }
 
-    // Inicializa los manejadores de eventos de formularios
-    function initializeFormHandlers() {
+    // Función para actualizar el menú después de hacer login
+function updateMenu(isAdmin) {
+    const loginLink = document.querySelector('a[data-page="login"]');
+    const registerLink = document.querySelector('a[data-page="register2"]');
+    const logoutLink = document.querySelector('a[data-page="logout"]');
+    const cartLink = document.querySelector('a[data-page="cart"]');
+    const changePasswordLink = document.querySelector('a[data-page="change_password"]');
+    const adminLink = document.querySelector('a[data-page="admin"]');
+
+    // Mostrar el botón de logout y cart
+    if (loginLink) loginLink.style.display = 'none';
+    if (registerLink) registerLink.style.display = 'none';
+    if (logoutLink) logoutLink.style.display = 'block';
+    if (cartLink) cartLink.style.display = 'block';
+    if (changePasswordLink) changePasswordLink.style.display = 'block';
+
+    // Mostrar el botón de Admin solo si el usuario es admin
+    if (isAdmin) {
+        if (adminLink) adminLink.style.display = 'block';
+    } else {
+        if (adminLink) adminLink.style.display = 'none';
+    }
+}
+
+
+
+// Variable para controlar si ya se han inicializado los formularios
+let formInitialized = false;
+
+function initializeFormHandlers() {
+    if (formInitialized) return;  // Evita volver a registrar los eventos
+
+    formInitialized = true;  // Marca que los formularios ya han sido inicializados
+        // Función para manejar el login en el formulario
         const loginForm = document.querySelector('#login-form');
         if (loginForm) {
             loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const formData = new FormData(loginForm);
+
                 try {
                     const response = await fetch('pages/login.php', {
                         method: 'POST',
@@ -51,15 +91,25 @@ include 'header.php';
                     const result = await response.text();
                     document.getElementById('login-message').innerHTML = result;
 
-                    // Si el login es exitoso, carga la página principal
                     if (result.includes('Correct password')) {
-                        loadPage('home');
+
+                        // Actualizar el menú dinámicamente
+                        //updateMenu(true);  // Pasar true si es admin
+                        //loginForm.reset(); // Limpia el formulario
+                        // Cargar la página principal después del login
+                        //loadPage('home');
+                        //window.location.href = 'pages/home.php';
+                        //window.location.href = 'pages/login.php';
+
                     }
+
                 } catch (error) {
+
                     document.getElementById('login-message').innerHTML = `<p>Error: ${error.message}</p>`;
                 }
             });
         }
+
 
         const registerForm = document.querySelector('#register-form');
         if (registerForm) {
@@ -110,6 +160,7 @@ include 'header.php';
 
         initializeFormHandlers();
     });
+    //loadPage('home');
 </script>
 
 <?php

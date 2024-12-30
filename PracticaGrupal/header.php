@@ -9,7 +9,7 @@
 <body>
     <header>
         <div class="container">
-            <h1><a href="index.php">Gym & Bikes</a></h1>
+            <h1><a href="#" data-page="home">Gym & Bikes</a></h1>
 
             <!-- Search Bar Section -->
             <div class="search-bar">
