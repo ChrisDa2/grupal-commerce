@@ -9,7 +9,7 @@
 <body>
     <header>
         <div class="container">
-            <h1><a href="#" data-page="home">Gym & Bikes</a></h1>
+            <h1><a href="index.php">Gym & Bikes</a></h1>
 
             <!-- Search Bar Section -->
             <div class="search-bar">
@@ -23,22 +23,22 @@
             <!-- Navigation Menu -->
             <nav>
                 <ul>
-                    <li><a href="#" data-page="home">Home</a></li>
-                    <li><a href="#" data-page="products">Products</a></li>
+                    <li><a href="index.php?page=home">Home</a></li>
+                    <li><a href="index.php?page=products">Products</a></li>
                     <?php if (isset($_SESSION['user_id'])): ?>
-                        <li><a href="#" data-page="cart">Cart</a></li>
-                        <li><a href="#" data-page="change_password">Change Password</a></li>
-                        <li><a href="#" data-page="logout">Logout</a></li>
-                            <?php if ($_SESSION['email'] == 'admin@gmail.com'): ?>
-                                <li><a href="#" data-page="admin">Admin</a></li>
-                            <?php endif; ?>
-                            <?php else: ?>
-                                <li><a href="#" data-page="login">Login</a></li>
-                                <li><a href="#" data-page="register2">Register</a></li>
-                            <?php endif; ?>
+                        <li><a href="index.php?page=cart">Cart</a></li>
+                        <li><a href="index.php?page=change_password">Change Password</a></li>
+                        <li><a href="index.php?page=logout">Logout</a></li>
+                        <?php if ($_SESSION['email'] == 'admin@gmail.com'): ?>
+                            <li><a href="index.php?page=admin">Admin</a></li>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <li><a href="index.php?page=login">Login</a></li>
+                        <li><a href="index.php?page=register2">Register</a></li>
+                    <?php endif; ?>
                 </ul>
             </nav>
 
         </div>
     </header>
-    <main id="main-content">
+    <main>

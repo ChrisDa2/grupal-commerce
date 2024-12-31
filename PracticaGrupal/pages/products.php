@@ -1,6 +1,4 @@
 <?php
-// Assuming $mysqli is your MySQLi connection
-include_once "../database.php";
 
 // Get the filter parameters from the form submission
 $categoryFilter = isset($_POST['category']) ? $_POST['category'] : '';

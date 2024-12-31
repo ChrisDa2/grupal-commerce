@@ -1,16 +1,9 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-session_start();
-require '../database.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email']);
-    $password = trim($_POST['password']);
 
-    // Busca el usuario por email
+    // Fetch the user by email
     $stmt = $mysqliM->prepare("SELECT * FROM users WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -19,13 +12,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result->num_rows === 1) {
         $user = $result->fetch_assoc();
 
-        // Verifica la contraseña hasheada
+        $password = trim($_POST['password']);
+         
+        // Verify the hashed password
         if (password_verify($password, $user['password'])) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['email'] = $user['email'];
-            $_SESSION['is_admin'] = ($user['email'] == 'admin@gmail.com');  // Asegúrate de configurar esta variable
-            var_dump($_SESSION); // Verifica los datos de la sesión
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
             echo "Correct password.";
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['email'] = $email;
+            header("Location: index.php");
+            exit();
         } else {
             echo "Invalid password.";
         }
@@ -35,15 +33,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<section>
-    <h2>Login</h2>
-    <form id="login-form" method="POST">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-        <button type="submit">Login</button>
-    </form>
-    <p id="login-message"></p>
-    <a href="#" data-page="register2">Register</a> | <a href="#" data-page="forgot_password">Forgot Password?</a>
-</section>
+
+<form method="POST">
+    <label>Email: </label><input type="email" name="email" required>
+    <br><br>
+    <label>Password: </label><input type="password" name="password" required><br><br>
+    <button type="submit">Login</button>
+</form>
+<br>
+<a href="index.php?page=forgot_password">Forgot Password?</a>
