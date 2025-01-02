@@ -6,7 +6,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
 // List of allowed pages to avoid external access
 $allowedPages = [
-    'index', 'home', 'products', 'product', 'cart', 'admin', 'login', 'logout', 'register', 'register2', 'forgot_password', 'reset_password', 'change_password', 'confirm_email'
+    'index', 'home', 'products', 'product', 'cart', 'admin', 'login', 'logout', 'register', 'register2', 'forgot_password', 'reset_password', 'change_password', 'confirm_email', 'filterProductsChristian'
 ];
 
 // If the page is not allowed, default to 'home'

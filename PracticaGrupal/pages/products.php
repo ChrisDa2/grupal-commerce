@@ -1,264 +1,90 @@
 <?php
+// Assuming you have already established the database connection
+// and fetched required data such as categories, brands, colors, types, styles, etc.
 
-// Get the filter parameters from the form submission
-$categoryFilter = isset($_POST['category']) ? $_POST['category'] : '';
-$brandFilter = isset($_POST['brand']) ? $_POST['brand'] : '';
-$colorFilter = isset($_POST['color']) ? $_POST['color'] : '';
-$typeFilter = isset($_POST['type']) ? $_POST['type'] : '';
-$styleFilter = isset($_POST['style']) ? $_POST['style'] : '';
-$minPrice = isset($_POST['min_price']) ? $_POST['min_price'] : '';
-$maxPrice = isset($_POST['max_price']) ? $_POST['max_price'] : '';
-$searchTerm = isset($_GET['search']) ? $_GET['search'] : ''; // Get search term
-$sortOption = isset($_POST['sort']) ? $_POST['sort'] : '';
+// Fetch categories, brands, colors, types, and styles for the filter options
+$categoriesResult = $mysqliC->query("SELECT DISTINCT category FROM products");
+$brandsResult = $mysqliC->query("SELECT DISTINCT brand FROM products");
+$colorsResult = $mysqliC->query("SELECT DISTINCT color FROM products");
+$typesResult = $mysqliC->query("SELECT DISTINCT type FROM products");
+$stylesResult = $mysqliC->query("SELECT DISTINCT style FROM products");
 
-// Number of products per page
+// These values will be set based on any existing filter
+$categoryFilter = $_POST['category'] ?? '';
+$brandFilter = $_POST['brand'] ?? '';
+$colorFilter = $_POST['color'] ?? '';
+$typeFilter = $_POST['type'] ?? '';
+$styleFilter = $_POST['style'] ?? '';
+$minPrice = $_POST['min_price'] ?? '';
+$maxPrice = $_POST['max_price'] ?? '';
+$sortOption = $_POST['sort'] ?? '';
+$currentPageNum = $_POST['page_num'] ?? 1;
 $itemsPerPage = 12;
-
-// Get the current page from the URL (default is 1)
-$currentPageNum = isset($_POST['page_num']) ? (int)$_POST['page_num'] : 1;
-$currentPageNum = max($currentPageNum, 1); // Ensure the page is at least 1
-
-// Calculate the OFFSET for the SQL query
 $offset = ($currentPageNum - 1) * $itemsPerPage;
 
-// Initialize filter conditions for products
-$filterParams = [];  // For bind_param usage
-
-// Start the query for filtering products
-$query = "SELECT * FROM products WHERE 1";
-
-// Add search term condition if provided
-if ($searchTerm) {
-    $query .= " AND name LIKE ?";
-    $filterParams[] = '%' . $searchTerm . '%';  // Add wildcards for partial match
-}
-
-// Add category filter if selected
-if ($categoryFilter) {
-    $query .= " AND category = ?";
-    $filterParams[] = $categoryFilter;
-}
-
-// Add brand filter if selected
-if ($brandFilter) {
-    $query .= " AND brand = ?";
-    $filterParams[] = $brandFilter;
-}
-
-// Add color filter if selected
-if ($colorFilter) {
-    $query .= " AND color = ?";
-    $filterParams[] = $colorFilter;
-}
-
-// Add type filter if selected
-if ($typeFilter) {
-    $query .= " AND type = ?";
-    $filterParams[] = $typeFilter;
-}
-
-// Add style filter if selected
-if ($styleFilter) {
-    $query .= " AND style = ?";
-    $filterParams[] = $styleFilter;
-}
-
-// Add price range filters if provided
-if ($minPrice) {
-    $query .= " AND price >= ?";
-    $filterParams[] = $minPrice;
-}
-
-if ($maxPrice) {
-    $query .= " AND price <= ?";
-    $filterParams[] = $maxPrice;
-}
-
-// Add sorting logic based on the selected sort option
-if ($sortOption) {
-    switch ($sortOption) {
-        case 'price_asc':
-            $query .= " ORDER BY price ASC";
-            break;
-        case 'price_desc':
-            $query .= " ORDER BY price DESC";
-            break;
-        case 'name_asc':
-            $query .= " ORDER BY name ASC";
-            break;
-        case 'name_desc':
-            $query .= " ORDER BY name DESC";
-            break;
-    }
-}
-
-// Add LIMIT and OFFSET for pagination
-$query .= " LIMIT ? OFFSET ?";
-$filterParams[] = $itemsPerPage;
-$filterParams[] = $offset;
-
-// Prepare the SQL statement
-$stmt = $mysqliC->prepare($query);
-
-// Dynamically build the bind type string based on the filters
-$bindTypes = '';
-foreach ($filterParams as $param) {
-    if (is_string($param)) {
-        $bindTypes .= 's';  // String
-    } elseif (is_numeric($param)) {
-        $bindTypes .= 'd';  // Decimal/Number
-    }
-}
-
-if ($bindTypes) {
-    $stmt->bind_param($bindTypes, ...$filterParams);
-}
-
-$stmt->execute();
-$result = $stmt->get_result();
-
-// Fetch products
-$products = [];
-while ($row = $result->fetch_assoc()) {
-    $products[] = $row;
-}
-
-// Initialize the query for counting filtered products
-$countQuery = "SELECT COUNT(*) as total FROM products WHERE 1";
-
-// Add the same filter conditions that are applied to the main query
-if ($searchTerm) {
-    $countQuery .= " AND name LIKE ?";
-}
-
-if ($categoryFilter) {
-    $countQuery .= " AND category = ?";
-}
-
-if ($brandFilter) {
-    $countQuery .= " AND brand = ?";
-}
-
-if ($colorFilter) {
-    $countQuery .= " AND color = ?";
-}
-
-if ($typeFilter) {
-    $countQuery .= " AND type = ?";
-}
-
-if ($styleFilter) {
-    $countQuery .= " AND style = ?";
-}
-
-if ($minPrice) {
-    $countQuery .= " AND price >= ?";
-}
-
-if ($maxPrice) {
-    $countQuery .= " AND price <= ?";
-}
-
-// Prepare the count query
-$countStmt = $mysqliC->prepare($countQuery);
-
-// Bind parameters dynamically
-$countFilterParams = [];
-$countBindTypes = '';
-
-if ($searchTerm) {
-    $countFilterParams[] = '%' . $searchTerm . '%';
-    $countBindTypes .= 's';
-}
-if ($categoryFilter) {
-    $countFilterParams[] = $categoryFilter;
-    $countBindTypes .= 's';
-}
-if ($brandFilter) {
-    $countFilterParams[] = $brandFilter;
-    $countBindTypes .= 's';
-}
-if ($colorFilter) {
-    $countFilterParams[] = $colorFilter;
-    $countBindTypes .= 's';
-}
-if ($typeFilter) {
-    $countFilterParams[] = $typeFilter;
-    $countBindTypes .= 's';
-}
-if ($styleFilter) {
-    $countFilterParams[] = $styleFilter;
-    $countBindTypes .= 's';
-}
-if ($minPrice) {
-    $countFilterParams[] = $minPrice;
-    $countBindTypes .= 'd';
-}
-if ($maxPrice) {
-    $countFilterParams[] = $maxPrice;
-    $countBindTypes .= 'd';
-}
-
-// Bind the parameters
-if ($countBindTypes) {
-    $countStmt->bind_param($countBindTypes, ...$countFilterParams);
-}
-
-// Execute the count query
-$countStmt->execute();
-
-// Fetch the result
-$countResult = $countStmt->get_result();
-$countRow = $countResult->fetch_assoc();
-
-// Get the total number of filtered products
-$totalFilteredProducts = $countRow['total'];
-
-// Calculate the total number of pages
-$totalPages = ceil($totalFilteredProducts / $itemsPerPage);
-
-// Fetch filter options (same as before)
-$filteredIdsCondition = '';
-$filterConditions = [];
-
-if ($categoryFilter) {
-    $filterConditions[] = "category = '$categoryFilter'";
-}
-if ($brandFilter) {
-    $filterConditions[] = "brand = '$brandFilter'";
-}
-if ($colorFilter) {
-    $filterConditions[] = "color = '$colorFilter'";
-}
-if ($typeFilter) {
-    $filterConditions[] = "type = '$typeFilter'";
-}
-if ($styleFilter) {
-    $filterConditions[] = "style = '$styleFilter'";
-}
-
-if (!empty($filterConditions)) {
-    $filteredIdsCondition = 'WHERE ' . implode(' AND ', $filterConditions);
-}
-
-// Fetch filter options based on the filtered products
-$brandsQuery = "SELECT DISTINCT brand FROM products $filteredIdsCondition";
-$colorsQuery = "SELECT DISTINCT color FROM products $filteredIdsCondition";
-$typesQuery = "SELECT DISTINCT type FROM products $filteredIdsCondition";
-$stylesQuery = "SELECT DISTINCT style FROM products $filteredIdsCondition";
-
-// Execute the filter queries
-$brandsResult = $mysqliC->query($brandsQuery);
-$colorsResult = $mysqliC->query($colorsQuery);
-$typesResult = $mysqliC->query($typesQuery);
-$stylesResult = $mysqliC->query($stylesQuery);
-
-// Now, for the category filter, always fetch all categories, regardless of the current filter.
-$categoriesQuery = "SELECT DISTINCT category FROM products";
-$categoriesResult = $mysqliC->query($categoriesQuery);
-
-
+include 'filterProductsChristian.php';
 ?>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+function fetchProducts() {
+    const productsContainer = $('.product-items');
+    productsContainer.html('<p class="loading">Loading...</p>');
+
+    const data = {
+        category: $('#category').val(),
+        brand: $('#brand').val(),
+        color: $('#color').val(),
+        type: $('#type').val(),
+        style: $('#style').val(),
+        min_price: $('input[name="min_price"]').val(),
+        max_price: $('input[name="max_price"]').val(),
+        search: $('#search').val(),
+        sort: $('#sort').val(),
+        page_num: $('input[name="page_num"]').val() || 1
+    };
+
+    console.log("Sending POST request with data:", data); // Log the data being sent
+
+    $.post('filterProductsChristian.php', data, function(response) {
+        console.log("Received response:", response); // Log the response
+
+        if (response.products && response.total_pages) {
+            productsContainer.empty();  // Clear existing content
+
+            // Display products
+            if (response.products.length > 0) {
+                response.products.forEach(function(product) {
+                    productsContainer.append(`
+                        <div class="product-item">
+                            <img src="${product.image_path}" alt="${product.name}" class="product-image">
+                            <h2>${product.name}</h2>
+                            <p>Price: $${product.price.toFixed(2)}</p>
+                            <a href="index.php?page=product&id=${product.id}" class="view-details">View Details</a>
+                        </div>
+                    `);
+                });
+            } else {
+                productsContainer.html('<p>No products found for the selected filters.</p>');
+            }
+
+            // Ensure that the products container is visible after appending content
+            productsContainer.show();
+
+            // Pagination
+            const pagination = $('.pagination');
+            pagination.empty();  // Clear previous pagination
+            for (let i = 1; i <= response.total_pages; i++) {
+                pagination.append(`<button onclick="changePage(${i})">${i}</button>`);
+            }
+        } else {
+            productsContainer.html('<p>Error loading products. Please try again.</p>');
+        }
+    }).fail(function() {
+        productsContainer.html('<p>Error loading products. Please check your connection.</p>');
+    });
+}
+</script>
 
 <section class="products">
     <div class="products-container">
@@ -266,6 +92,13 @@ $categoriesResult = $mysqliC->query($categoriesQuery);
         <div class="filter-sidebar">
             <h3>Filter By</h3>
             <form method="POST" action="index.php?page=products">
+
+                <!-- Search Filter -->
+                <div class="filter-search">
+                    <label for="search">Search:</label>
+                    <input type="text" id="search" placeholder="Search products">
+                </div><br>
+
                 <!-- Category Filter -->
                 <div class="filter-category">
                     <label for="category">Category:</label>
@@ -350,7 +183,8 @@ $categoriesResult = $mysqliC->query($categoriesQuery);
                     </select>
                 </div><br>
 
-                <button type="submit">Apply Filters</button>
+                <!-- Submit Button -->
+                <button type="submit" id="submit-filters">Apply Filters</button>
             </form>
         </div>
 
@@ -358,51 +192,15 @@ $categoriesResult = $mysqliC->query($categoriesQuery);
         <div class="product-list">
             <h1>Our Products</h1>
             <div class="product-items">
-                <?php if (count($products) > 0): ?>
-                    <?php foreach ($products as $product): ?>
-                        <div class="product-item">
-                            <img src="<?php echo htmlspecialchars($product['image_path']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="product-image">
-                            <h2><?php echo htmlspecialchars($product['name']); ?></h2>
-                            <p>Price: $<?php echo number_format($product['price'], 2); ?></p>
-                            <a href="index.php?page=product&id=<?php echo $product['id']; ?>" class="view-details">View Details</a>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <p>No products found for the selected filters.</p>
-                <?php endif; ?>
+                <!-- Initially, products will be loaded dynamically via AJAX -->
+                <script>
+                    fetchProducts();
+                </script>
             </div>
 
-            <!-- Pagination Form -->
+            <!-- Pagination -->
             <div class="pagination">
-                <?php if ($currentPageNum > 1): ?>
-                    <form method="POST" action="index.php?page=products" style="display: inline;">
-                        <?php foreach ($_POST as $key => $value): ?>
-                            <input type="hidden" name="<?php echo htmlspecialchars($key); ?>" value="<?php echo htmlspecialchars($value); ?>">
-                        <?php endforeach; ?>
-                        <input type="hidden" name="page_num" value="<?php echo $currentPageNum - 1; ?>">
-                        <button type="submit">&laquo; Previous</button>
-                    </form>
-                <?php endif; ?>
-
-                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <form method="POST" action="index.php?page=products" style="display: inline;">
-                        <?php foreach ($_POST as $key => $value): ?>
-                            <input type="hidden" name="<?php echo htmlspecialchars($key); ?>" value="<?php echo htmlspecialchars($value); ?>">
-                        <?php endforeach; ?>
-                        <input type="hidden" name="page_num" value="<?php echo $i; ?>">
-                        <button type="submit"><?php echo $i; ?></button>
-                    </form>
-                <?php endfor; ?>
-
-                <?php if ($currentPageNum < $totalPages): ?>
-                    <form method="POST" action="index.php?page=products" style="display: inline;">
-                        <?php foreach ($_POST as $key => $value): ?>
-                            <input type="hidden" name="<?php echo htmlspecialchars($key); ?>" value="<?php echo htmlspecialchars($value); ?>">
-                        <?php endforeach; ?>
-                        <input type="hidden" name="page_num" value="<?php echo $currentPageNum + 1; ?>">
-                        <button type="submit">Next &raquo;</button>
-                    </form>
-                <?php endif; ?>
+                <!-- Pagination buttons will be generated dynamically in the fetchProducts() callback -->
             </div>
         </div>
     </div>

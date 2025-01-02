@@ -11,15 +11,6 @@
         <div class="container">
             <h1><a href="index.php">Gym & Bikes</a></h1>
 
-            <!-- Search Bar Section -->
-            <div class="search-bar">
-                <form method="GET" action="index.php">
-                    <input type="hidden" name="page" value="products">
-                    <input type="text" name="search" placeholder="Search for products..." value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
-                    <button type="submit">Search</button>
-                </form>
-            </div>
-
             <!-- Navigation Menu -->
             <nav>
                 <ul>
